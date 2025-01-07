@@ -1,91 +1,90 @@
-import './style.css'
-
+import './style.css';
 import * as THREE from 'three';
-
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'; 
 
-import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
+// Constants
+const CAMERA_POSITION = new THREE.Vector3(0, 0, 0); // Fixed camera position
 
-// Setup
-const scene = new THREE.Scene(); // The container for all objects
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000); // The camera that sees the scene
-camera.position.set(0, 5, 5); // Set the camera position to 5 units on the z-axis
-const renderer = new THREE.WebGLRenderer({  // The renderer that displays the scene
+// Scene Setup
+const scene = new THREE.Scene();
+
+const camera = new THREE.PerspectiveCamera(
+  75,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
+);
+camera.position.copy(CAMERA_POSITION);
+
+const renderer = new THREE.WebGLRenderer({
   canvas: document.querySelector('#bg'),
 });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(window.innerWidth, window.innerHeight);
 
-renderer.setPixelRatio(window.devicePixelRatio); // Set the pixel ratio of the renderer to the device pixel ratio
-renderer.setSize(window.innerWidth, window.innerHeight); // Set the size of the renderer to the window size
-camera.position.setZ(30); // Set the camera position to 30 units on the z-axis
+// Lighting
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // General ambient light
+scene.add(ambientLight);
 
-// Objects
-const pointLight = new THREE.PointLight(0xffffff); // Create a point light
-pointLight.intensity = 500; // Set the intensity of the light
-pointLight.position.set(10, 20, 10); // Set the position of the point light
+// Create Stars with Twinkling and Full 3D Movement
+const stars = [];
+const createStar = () => {
+  const starGeometry = new THREE.SphereGeometry(0.1, 16, 16); // Smaller star size
+  const starMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  const star = new THREE.Mesh(starGeometry, starMaterial);
 
-const ambientLight = new THREE.AmbientLight(0xffffff); // Create an ambient light
-scene.add(pointLight, ambientLight); // Add the light to the scene
+  // Randomize position in full 3D space
+  const radius = Math.random() * 200 + 50; // Distance from the center (50 to 250 units)
+  const theta = Math.random() * 2 * Math.PI; // Angle around the Y-axis
+  const yOffset = Math.random() * 100 - 50; // Random height (-50 to 50)
 
-const lightHelper = new THREE.PointLightHelper(pointLight); // Create a light helper
-const gridHelper = new THREE.GridHelper(200, 50); // Create a grid helper
-scene.add(lightHelper, gridHelper); // Add the helpers to the scene
+  const x = radius * Math.cos(theta);
+  const z = radius * Math.sin(theta);
+  const y = yOffset; // Set random vertical position
 
-const controls = new OrbitControls(camera, renderer.domElement); // Create orbit controls 
-controls.enableDamping = true; // Enable damping
+  star.position.set(x, y, z);
 
-function addStar() {
-  const geometry = new THREE.SphereGeometry(0.05); 
-  const material = new THREE.MeshStandardMaterial({ color: 0xffffff });
-  const star = new THREE.Mesh(geometry, material);
-
-  const [x, y, z] = Array(3).fill().map(() => THREE.MathUtils.randFloatSpread(100)); // Create random coordinates
-
-  star.position.set(x, y, z); // Set the position of the star
-  scene.add(star); // Add the star to the scene
-}
-
-Array(5000).fill().forEach(addStar); // Create 200 stars
-
-// Add loading screen to the scene
-const loader = new THREE.TextureLoader(); // Create a texture loader
-const loadingScreen = {
-  scene: new THREE.Scene(),
-  camera: new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000),
+  scene.add(star);
+  stars.push({ star, radius, theta, y, speed: Math.random() * 0.001 + 0.0005 }); // Slower revolution
 };
-loadingScreen.camera.position.setZ(30); // Set the camera position to 30 units on the z-axis
-const loadingManager = new THREE.LoadingManager(() => {
-  const loadingScreen = document.getElementById('loading-screen'); // Get the loading screen
-  loadingScreen.classList.add('fade-out'); // Add fade out class
-  loadingScreen.addEventListener('transitionend', onTransitionEnd); // Add event listener
+
+Array(500).fill().forEach(createStar); // Create 500 stars
+
+// Add fbx model which rotates slowly
+const loader = new FBXLoader();
+loader.load('src/assets/Stylized Planets.fbx', (obj) => { 
+  obj.position.set(-10, 0, -100); // Move the model down
+  obj.scale.set(0.1, 0.1, 0.1); // Scale down the model
+  scene.add(obj);
 });
 
+// Load textures
+const textureLoader = new THREE.TextureLoader();
+const baseColor = textureLoader.load('src/assets/Textures/Saturn 4K/Saturn2_Saturn_BaseColor.png');
+const normalMap = textureLoader.load('src/assets/Textures/Saturn 4K/Saturn2_Saturn_Normal.png');
+const roughnessMap = textureLoader.load('src/assets/Textures/Saturn 4K/Saturn2_Saturn_Roughness.png');
+const metallicMap = textureLoader.load('src/assets/Textures/Saturn 4K/Saturn2_Saturn_Metallic.png');
 
+// Load FBX model
+loader.load('src/assets/Stylized Planets.fbx', (obj) => {
+  obj.position.set(-10, 0, -100); // Adjust position
+  obj.scale.set(0.1, 0.1, 0.1); // Scale model
 
-// const spaceTexture = new THREE.TextureLoader().load('src/assets/SpaceIllustration.jpg'); // Load the space texture
-// scene.background = spaceTexture; // Set the space texture as the background
+  obj.traverse((child) => {
+    if (child.isMesh) {
+      // Apply textures to the mesh material
+      child.material = new THREE.MeshStandardMaterial({
+        map: baseColor,
+        normalMap: normalMap,
+        roughnessMap: roughnessMap,
+        metalnessMap: metallicMap,
+      });
+    }
+  });
 
-// FBX model
-const fbx = new FBXLoader(); // Create a FBX loader
-fbx.load('src/assets/MotherBoard.fbx', (object) => { // Load the FBX model
-  scene.add(object); // Add the model to the scene
+  scene.add(obj); // Add the model to the scene
 });
-
-// Move around with arrow keys according to vector position such that the camera moves in the direction of the camera
-function moveCamera() {
-  const t = document.body.getBoundingClientRect().top; // Get the top position of the document
-  camera.position.x = t * -0.01; // Move the camera to the left or right
-  camera.position.y = t * -0.0002; // Move the camera up or down
-  camera.position.z = t * -0.01; // Move the camera forward or backward
-}
-
-function animate() {
-  requestAnimationFrame(animate); // Request the browser to call the function again
-
-  controls.update(); // Update the controls
-
-  renderer.render(scene, camera); // Render the scene
-}
-animate(); // Call the function
 
 // Resize Handling
 window.addEventListener('resize', () => {
@@ -93,3 +92,30 @@ window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
 });
+
+// Animation Loop
+let time = 0;
+const animate = () => {
+  requestAnimationFrame(animate);
+
+  // Update star positions for horizontal and vertical revolving motion
+  stars.forEach((data) => {
+    const { star, radius, speed, y } = data;
+    data.theta += speed; // Increment the angle of rotation
+    const x = radius * Math.cos(data.theta);
+    const z = radius * Math.sin(data.theta);
+
+    star.position.set(x, y, z); // Maintain the randomized y-position
+  });
+
+  // Twinkling Effect
+  time += 0.1; // Faster twinkling
+  stars.forEach(({ star }, index) => {
+    const intensity = Math.abs(Math.sin(time + index * 0.5)) * 1.5 + 0.5; // Stronger twinkle
+    star.material.color.setScalar(intensity);
+  });
+
+  renderer.render(scene, camera);
+};
+
+animate();
