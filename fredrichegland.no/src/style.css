@@ -47,19 +47,22 @@
      ========================= */
   #board {
     font-family: 'Century Gothic', sans-serif;
-    transform: perspective(600px) rotateX(25deg);
+    transform: perspective(600px) rotateX(20deg);
     transform-origin: 50% 100%;
-    text-align: justify;
+    /* text-align: justify; */
+    text-align:center; 
     position: absolute;
     font-weight: bold;
-    /* overflow: hidden; */
+    overflow: hidden;
     font-size: 2.5rem;
     height: 50em;
-    width: 20em;
-    /* bottom: 0; */
-    top: 50%;
+    width: 30em;
+    padding-top: 50em;
+    bottom: 0;
+    /* top: 50%; */
+    /* border: solid 2px red; */
     left: 50%;
-    margin-left: -10em;
+    margin-left: -15em;
     color: #FFFF82;
   }
   
