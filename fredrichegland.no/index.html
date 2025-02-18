@@ -5,21 +5,44 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fredric Hegland Portfolio</title>
+    <style>
+      /* Scroll lock until intro animation completes */
+      body {
+        overflow: hidden;
+      }
+    </style>
   </head>
-  <body>
+  <body data-intro-complete="false">
     <canvas id="bg"></canvas>
-    <div id="scrollBox">
-      <h1>Fredric Hegland</h1>
-      <p>Hello! I'm Fredric Hegland, a computer technology student currently pursuing a bachelor's degree. I'm passionate about programming, artificial intelligence, and creating dynamic, interactive websites. I plan to further my education with a master's degree in software development at the University of Bergen.</p>
-      <p>Here are a few things I specialize in:</p>
-      <ul>2
-        <li>Web development (React, Vue, Three.js)</li>
-        <li>Machine learning and AI projects</li>
-        <li>Collaborative software engineering</li>
-      </ul>
-      <p>Feel free to scroll to explore my journey and the projects I've worked on!</p>
 
-    </div>
+    <main>
+      <!-- Intro Section -->
+      <section class="intro">
+        A long time ago, in a galaxy far,<br> far away....
+      </section>
+
+      <!-- Star Wars Style Scrolling Board -->
+      <div id="board">  
+        <div id="content">
+          <h1 id="title">Fredric Hegland</h1>
+          <h3 id="subtitle">Student Software Engineer @ Amitec | Leader @ ITxBergen | B.Sc in Computer Technology</h3>
+          <br>
+          <p>Hi! My name is Fredric Hegland. I am born and raised in the city of Bergen, Norway. I am currently studying computer technology at the University of Bergen</p>
+          <p>I have had multiple part-time jobs during my studies, but am currently working part-time as a Student Software Engineer at Amitec based in Kokstad, Bergen. Here i work with IT/OT and time-series-data through PI Systems.</p>
+          <p>On the side I am also a leader of the student organisation ITxBergen which has a main focus on arranging career-days as well as other minor activities for all the IT-students in Bergen.</p>
+        </div>  
+      </div>
+    </main>
+
     <script type="module" src="/src/main.js"></script>
+
+    <script>
+      // Enable scrolling after intro animation
+      const intro = document.querySelector('.intro');
+      intro.addEventListener('animationend', () => {
+        document.body.style.overflow = 'auto';
+        document.body.setAttribute('data-intro-complete', 'true');
+      });
+    </script>
   </body>
 </html>

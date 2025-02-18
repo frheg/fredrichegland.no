@@ -1,14 +1,23 @@
+// =========================
+// Portfolio Website Refactor: main.js
+// Features: Three.js animation, Star Wars-style scroll, Intro lock
+// =========================
+
 import './style.css';
 import * as THREE from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'; 
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
-// Constants
-const CAMERA_POSITION = new THREE.Vector3(0, 0, 0); // Fixed camera position
+// =========================
+// Constants & Scene Setup
+// =========================
 
-// Scene Setup
+const CAMERA_POSITION = new THREE.Vector3(0, 0, 5); // Slight initial offset for better perspective
+const STAR_COUNT = 8000;
+const STAR_FIELD_RADIUS = 700;
+const STAR_ROTATION_SPEED = 0.005;
+
 const scene = new THREE.Scene();
-
 const camera = new THREE.PerspectiveCamera(
   75,
   window.innerWidth / window.innerHeight,
@@ -19,103 +28,150 @@ camera.position.copy(CAMERA_POSITION);
 
 const renderer = new THREE.WebGLRenderer({
   canvas: document.querySelector('#bg'),
+  antialias: true,
 });
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 
+// =========================
 // Lighting
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // General ambient light
-scene.add(ambientLight);
+// =========================
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+const pointLight = new THREE.PointLight(0xffffff, 1, 500);
+pointLight.position.set(50, 50, 50);
+scene.add(ambientLight, pointLight);
 
-// Create Stars with Twinkling and Full 3D Movement
+// =========================
+// Star Field Creation
+// =========================
 const stars = [];
 const createStar = () => {
-  const starGeometry = new THREE.SphereGeometry(0.1, 16, 16); // Smaller star size
+  const starGeometry = new THREE.SphereGeometry(0.1, 16, 16);
   const starMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
   const star = new THREE.Mesh(starGeometry, starMaterial);
 
-  // Randomize position in full 3D space
-  const radius = Math.random() * 200 + 50; // Distance from the center (50 to 250 units)
-  const theta = Math.random() * 2 * Math.PI; // Angle around the Y-axis
-  const yOffset = Math.random() * 100 - 50; // Random height (-50 to 50)
-
+  const radius = Math.random() * STAR_FIELD_RADIUS - STAR_FIELD_RADIUS / 2;
+  const theta = Math.random() * Math.PI * 2;
   const x = radius * Math.cos(theta);
   const z = radius * Math.sin(theta);
-  const y = yOffset; // Set random vertical position
+  const y = Math.random() * 600 - 300;
 
   star.position.set(x, y, z);
-
   scene.add(star);
-  stars.push({ star, radius, theta, y, speed: Math.random() * 0.001 + 0.0005 }); // Slower revolution
+
+  stars.push({ star, radius, theta, y, speed: Math.random() * STAR_ROTATION_SPEED });
 };
 
-Array(500).fill().forEach(createStar); // Create 500 stars
+// Create multiple stars
+Array.from({ length: STAR_COUNT }).forEach(createStar);
 
-// Add fbx model which rotates slowly
+// =========================
+// Load Planet Model (FBX)
+// =========================
+let planetModel = null;
 const loader = new FBXLoader();
-loader.load('src/assets/Stylized Planets.fbx', (obj) => { 
-  obj.position.set(-10, 0, -100); // Move the model down
-  obj.scale.set(0.1, 0.1, 0.1); // Scale down the model
-  scene.add(obj);
-});
-
-// Load textures
 const textureLoader = new THREE.TextureLoader();
-const baseColor = textureLoader.load('src/assets/Textures/Saturn 4K/Saturn2_Saturn_BaseColor.png');
-const normalMap = textureLoader.load('src/assets/Textures/Saturn 4K/Saturn2_Saturn_Normal.png');
-const roughnessMap = textureLoader.load('src/assets/Textures/Saturn 4K/Saturn2_Saturn_Roughness.png');
-const metallicMap = textureLoader.load('src/assets/Textures/Saturn 4K/Saturn2_Saturn_Metallic.png');
 
-// Load FBX model
+const textures = {
+  baseColor: textureLoader.load('src/assets/Textures/Saturn 4K/Saturn2_Saturn_BaseColor.png'),
+  normalMap: textureLoader.load('src/assets/Textures/Saturn 4K/Saturn2_Saturn_Normal.png'),
+  roughnessMap: textureLoader.load('src/assets/Textures/Saturn 4K/Saturn2_Saturn_Roughness.png'),
+  metallicMap: textureLoader.load('src/assets/Textures/Saturn 4K/Saturn2_Saturn_Metallic.png'),
+};
+
 loader.load('src/assets/Stylized Planets.fbx', (obj) => {
-  obj.position.set(-10, 0, -100); // Adjust position
-  obj.scale.set(0.1, 0.1, 0.1); // Scale model
+  obj.position.set(0, 0, 0);
+  obj.scale.set(0.1, 0.1, 0.1);
 
   obj.traverse((child) => {
     if (child.isMesh) {
-      // Apply textures to the mesh material
       child.material = new THREE.MeshStandardMaterial({
-        map: baseColor,
-        normalMap: normalMap,
-        roughnessMap: roughnessMap,
-        metalnessMap: metallicMap,
+        map: textures.baseColor,
+        normalMap: textures.normalMap,
+        roughnessMap: textures.roughnessMap,
+        metalnessMap: textures.metallicMap,
       });
     }
   });
 
-  scene.add(obj); // Add the model to the scene
+  // scene.add(obj);
+  planetModel = obj;
 });
 
-// Resize Handling
-window.addEventListener('resize', () => {
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
+// =========================
+// Scroll Lock Until Intro Ends
+// =========================
+document.body.style.overflow = 'hidden'; // Initial lock
+const intro = document.querySelector('.intro');
+intro.addEventListener('animationend', () => {
+  document.body.style.overflow = 'auto';
+  document.body.setAttribute('data-intro-complete', 'true');
 });
 
+// =========================
+// Scroll-based Camera Movement
+// =========================
+function moveCamera() {
+  if (document.body.getAttribute('data-intro-complete') !== 'true') return; // Stop if intro isn't done
+
+  const t = document.body.getBoundingClientRect().top;
+  camera.position.z = CAMERA_POSITION.z - t * 0.1;
+  camera.rotation.y = t * -0.0002; // Subtle rotation for effect
+}
+
+document.body.onscroll = moveCamera;
+
+// =========================
+// Scroll-based Website Movement
+// =========================
+const boardContent = document.getElementById('content');
+
+function moveBoard() {
+  if (document.body.getAttribute('data-intro-complete') !== 'true') return;
+  const scrollY = window.scrollY;
+  boardContent.style.transform = `translateY(${100 - scrollY * 10}%)`;
+}
+
+document.body.onscroll = moveBoard;
+
+// =========================
 // Animation Loop
+// =========================
 let time = 0;
-const animate = () => {
+function animate() {
   requestAnimationFrame(animate);
 
-  // Update star positions for horizontal and vertical revolving motion
-  stars.forEach((data) => {
-    const { star, radius, speed, y } = data;
-    data.theta += speed; // Increment the angle of rotation
-    const x = radius * Math.cos(data.theta);
-    const z = radius * Math.sin(data.theta);
+  // Rotate Planet Model
+  if (planetModel) {
+    planetModel.rotation.y += 0.001;
+  }
 
-    star.position.set(x, y, z); // Maintain the randomized y-position
-  });
+  // Update Stars (Twinkling Effect)
+  time += 0.1;
+  stars.forEach(({ star, radius, speed, y }, index) => {
+    const theta = time * speed + index * 0.05;
+    const x = radius * Math.cos(theta);
+    const z = radius * Math.sin(theta);
+    star.position.set(x, y, z);
 
-  // Twinkling Effect
-  time += 0.1; // Faster twinkling
-  stars.forEach(({ star }, index) => {
-    const intensity = Math.abs(Math.sin(time + index * 0.5)) * 1.5 + 0.5; // Stronger twinkle
+    // Star Twinkle
+    const intensity = Math.abs(Math.sin(time + index * 0.1)) * 1.2 + 0.3;
     star.material.color.setScalar(intensity);
   });
 
   renderer.render(scene, camera);
-};
+}
 
+// =========================
+// Handle Window Resizing
+// =========================
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// =========================
+// Start Animation
+// =========================
 animate();

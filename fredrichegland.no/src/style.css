@@ -1,63 +1,103 @@
-body {
-  margin: 0;
-  overflow-x: hidden; /* Prevent horizontal scrolling */
-  font-family: Arial, sans-serif;
-  color: #ffffff;
-}
 
-#bg {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: -1; /* Keep the background behind everything */
-}
-
-#scrollBox {
-  position: sticky;
-  margin-top: 90%;
-  /* transform: translate(-20%, 0); */
-  width: 100%;
-  background: rgba(20, 20, 20, 0.8); /* Dark but transparent background for visibility */
-  padding: 2rem;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-  z-index: 1;
-  font-family: Arial, sans-serif;
-}
-
-h1 {
-  font-size: 2.5rem;
-  text-align: center;
-  margin-bottom: 1rem;
-}
-
-p {
-  font-size: 1.2rem;
-  line-height: 1.6;
-  margin: 1rem 0;
-}
-
-ul {
-  margin: 1rem 0;
-  padding-left: 1.5rem;
-}
-
-ul li {
-  font-size: 1.1rem;
-  line-height: 1.6;
-}
-
-@media (max-width: 768px) {
-  #scrollBox {
-    width: 90%;
-    padding: 1.5rem;
+/* =========================
+   Global Styles & Layout
+   ========================= */
+   body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Lock scrolling until intro ends */
+    background-color: black;
+    font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;
   }
-
-  h1 {
-    font-size: 2rem;
+  
+  /* =========================
+     Intro Animation
+     ========================= */
+  .intro {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    animation: intro 3s ease-out 1s forwards;
+    color: rgb(75, 213, 238);
+    font-weight: 400;
+    font-size: 3rem;
+    opacity: 0;
+    text-align: center;
   }
-
-  p,
-  ul li {
-    font-size: 1rem;
+  
+  @keyframes intro {
+    0% {
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
   }
-}
+  
+  /* =========================
+     Star Wars Scrolling Board
+     ========================= */
+  #board {
+    font-family: 'Century Gothic', sans-serif;
+    transform: perspective(600px) rotateX(25deg);
+    transform-origin: 50% 100%;
+    text-align: justify;
+    position: absolute;
+    font-weight: bold;
+    /* overflow: hidden; */
+    font-size: 2.5rem;
+    height: 50em;
+    width: 20em;
+    /* bottom: 0; */
+    top: 50%;
+    left: 50%;
+    margin-left: -10em;
+    color: #FFFF82;
+  }
+  
+  #board:after {
+    position: absolute;
+    content: ' ';
+    bottom: 60%;
+    left: 0;
+    right: 0;
+    top: 0;
+    /* background: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 100%); */
+    pointer-events: none;
+  }
+  
+  /* =========================
+     Typography
+     ========================= */
+  p {
+    color: #FFFF82;
+    padding: 5%;
+    /* text-shadow: 0px 0px 15px rgba(255, 255, 130, 0.7); */
+  }
+  
+  #title, #subtitle {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 1em;
+  }
+  
+  /* =========================
+     Responsive Design
+     ========================= */
+  @media (max-width: 768px) {
+    .intro {
+      font-size: 2rem;
+    }
+    #board {
+      font-size: 1.5rem;
+      width: 15em;
+    }
+  }
