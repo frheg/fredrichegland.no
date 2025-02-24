@@ -76,21 +76,6 @@ intro.addEventListener('animationend', () => {
 });
 
 // =========================
-// Scroll-based Board Movement
-// =========================
-const boardContent = document.getElementById('board');
-
-function moveBoard() {
-  if (document.body.getAttribute('data-intro-complete') !== 'true') return;
-  const scrollY = window.scrollY;
-  console.log(scrollY);
-  const scrollSpeed = 0.01;
-  boardContent.style.transform = `translateY(${scrollY + scrollSpeed}%)`;
-}
-
-document.body.onscroll = moveBoard;
-
-// =========================
 // Animation Loop
 // =========================
 let time = 0;
