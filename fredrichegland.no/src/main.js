@@ -12,7 +12,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 // Constants & Scene Setup
 // =========================
 
-const CAMERA_POSITION = new THREE.Vector3(0, 0, 5); // Slight initial offset for better perspective
+const CAMERA_POSITION = new THREE.Vector3(0, 0, 100); // Slight initial offset for better perspective
 const STAR_COUNT = 8000;
 const STAR_FIELD_RADIUS = 700;
 const STAR_ROTATION_SPEED = 0.005;
@@ -54,7 +54,7 @@ const createStar = () => {
   const theta = Math.random() * Math.PI * 2;
   const x = radius * Math.cos(theta);
   const z = radius * Math.sin(theta);
-  const y = Math.random() * 600 - 300;
+  const y = Math.random() * STAR_FIELD_RADIUS - STAR_FIELD_RADIUS / 2;
 
   star.position.set(x, y, z);
   scene.add(star);
@@ -64,39 +64,6 @@ const createStar = () => {
 
 // Create multiple stars
 Array.from({ length: STAR_COUNT }).forEach(createStar);
-
-// =========================
-// Load Planet Model (FBX)
-// =========================
-let planetModel = null;
-const loader = new FBXLoader();
-const textureLoader = new THREE.TextureLoader();
-
-const textures = {
-  baseColor: textureLoader.load('src/assets/Textures/Saturn 4K/Saturn2_Saturn_BaseColor.png'),
-  normalMap: textureLoader.load('src/assets/Textures/Saturn 4K/Saturn2_Saturn_Normal.png'),
-  roughnessMap: textureLoader.load('src/assets/Textures/Saturn 4K/Saturn2_Saturn_Roughness.png'),
-  metallicMap: textureLoader.load('src/assets/Textures/Saturn 4K/Saturn2_Saturn_Metallic.png'),
-};
-
-loader.load('src/assets/Stylized Planets.fbx', (obj) => {
-  obj.position.set(0, 0, 0);
-  obj.scale.set(0.1, 0.1, 0.1);
-
-  obj.traverse((child) => {
-    if (child.isMesh) {
-      child.material = new THREE.MeshStandardMaterial({
-        map: textures.baseColor,
-        normalMap: textures.normalMap,
-        roughnessMap: textures.roughnessMap,
-        metalnessMap: textures.metallicMap,
-      });
-    }
-  });
-
-  // scene.add(obj);
-  planetModel = obj;
-});
 
 // =========================
 // Scroll Lock Until Intro Ends
@@ -109,27 +76,16 @@ intro.addEventListener('animationend', () => {
 });
 
 // =========================
-// Scroll-based Camera Movement
+// Scroll-based Board Movement
 // =========================
-function moveCamera() {
-  if (document.body.getAttribute('data-intro-complete') !== 'true') return; // Stop if intro isn't done
-
-  const t = document.body.getBoundingClientRect().top;
-  camera.position.z = CAMERA_POSITION.z - t * 0.1;
-  camera.rotation.y = t * -0.0002; // Subtle rotation for effect
-}
-
-document.body.onscroll = moveCamera;
-
-// =========================
-// Scroll-based Website Movement
-// =========================
-const boardContent = document.getElementById('content');
+const boardContent = document.getElementById('board');
 
 function moveBoard() {
   if (document.body.getAttribute('data-intro-complete') !== 'true') return;
   const scrollY = window.scrollY;
-  boardContent.style.transform = `translateY(${100 - scrollY * 10}%)`;
+  console.log(scrollY);
+  const scrollSpeed = 0.01;
+  boardContent.style.transform = `translateY(${scrollY + scrollSpeed}%)`;
 }
 
 document.body.onscroll = moveBoard;
@@ -140,11 +96,6 @@ document.body.onscroll = moveBoard;
 let time = 0;
 function animate() {
   requestAnimationFrame(animate);
-
-  // Rotate Planet Model
-  if (planetModel) {
-    planetModel.rotation.y += 0.001;
-  }
 
   // Update Stars (Twinkling Effect)
   time += 0.1;
