@@ -1,0 +1,55 @@
+/* =========================
+   Global Styles
+   ========================= */
+   body {
+    margin: 0;
+    padding: 0;
+    background-color: black;
+    font-family: 'Poppins', sans-serif;
+    color: white;
+    text-align: center;
+  }
+  
+  /* =========================
+     Intro Animation
+     ========================= */
+  .intro {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    font-size: 2rem;
+    font-weight: bold;
+    color: rgb(255, 223, 0);
+    text-shadow: 2px 2px 5px rgba(255, 255, 255, 0.6);
+    animation: fadeOut 5s ease-out forwards;
+  }
+  
+  @keyframes fadeOut {
+    0% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  
+  /* =========================
+     Main Content Area
+     ========================= */
+  #board {
+    width: 60%;
+    margin: 100px auto;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    backdrop-filter: blur(5px);
+  }
+  
+  /* =========================
+     Footer
+     ========================= */
+  footer {
+    margin-top: 50px;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+  }
+  

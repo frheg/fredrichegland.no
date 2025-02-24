@@ -20,10 +20,10 @@
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 10;
-    animation: intro 0.3s ease-out 0.1s forwards;
+    animation: intro 3s ease-out 1s forwards;
     color: rgb(75, 213, 238);
     font-weight: 400;
-    font-size: 3rem;
+    font-size: 2rem;
     opacity: 0;
     text-align: center;
   }
@@ -31,6 +31,38 @@
   @keyframes intro {
     0% {
         opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+  }
+
+  /* =========================
+     Instructions
+     ========================= */
+  .instruction {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    animation: intro 3s ease-out 1s forwards;
+    animation-delay: 4s;
+    font-weight: 400;
+    font-size: 1rem;
+    opacity: 0;
+    text-align: center;
+  }
+
+  @keyframes instruction {
+    0% {
+      opacity: 0;
     }
     20% {
         opacity: 1;
@@ -64,7 +96,7 @@
     text-align:center; 
     position: absolute;
     width: 60%;
-    height: 100%;
+    /* height: 100%; */
     top: 100%;
     left: 0%;
     right: 0%;
@@ -73,11 +105,19 @@
     overflow: hidden;
     background-color: rgba(0, 0, 0, 0.2);
   }
+
+  p {
+    text-align: justify;
+  }
   
   #title, #subtitle {
     text-align: center;
     font-weight: bold;
     margin-bottom: 1em;
+  }
+
+  .toptitle {
+    padding-bottom: 50%;
   }
 
   #selfportrait {

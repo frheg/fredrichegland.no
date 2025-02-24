@@ -12,7 +12,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 // Constants & Scene Setup
 // =========================
 
-const CAMERA_POSITION = new THREE.Vector3(0, 0, 100); // Slight initial offset for better perspective
+const CAMERA_POSITION = new THREE.Vector3(0, 0, 100); // Initial offset for better perspective
 const STAR_COUNT = 8000;
 const STAR_FIELD_RADIUS = 700;
 const STAR_ROTATION_SPEED = 0.005;
@@ -66,6 +66,28 @@ const createStar = () => {
 Array.from({ length: STAR_COUNT }).forEach(createStar);
 
 // =========================
+// Create a planet
+// =========================
+const planetRadius = 10;
+const planetVector = new THREE.Vector3(-50, 10, -50);
+const planetSize = 1;
+const planetGeometry = new THREE.SphereGeometry(planetRadius, 32, 32);
+const planetMaterial = new THREE.MeshBasicMaterial();
+const planet = new THREE.Mesh(planetGeometry, planetMaterial);
+scene.add(planet);
+
+// Add planet to scene
+planet.position.copy(planetVector);
+planet.scale.set(planetSize, planetSize, planetSize);
+
+// Add texture to planet
+const textureLoader = new THREE.TextureLoader();
+textureLoader.load('src/assets/Models/Earth 3D Model/textures/1_earth_8k.jpg', (texture) => {
+  planetMaterial.map = texture;
+  planetMaterial.needsUpdate = true;
+});
+
+// =========================
 // Scroll Lock Until Intro Ends
 // =========================
 document.body.style.overflow = 'hidden'; // Initial lock
@@ -74,6 +96,13 @@ intro.addEventListener('animationend', () => {
   document.body.style.overflow = 'auto';
   document.body.setAttribute('data-intro-complete', 'true');
 });
+
+// =========================
+// Function to spin an object around its axis
+// =========================
+const spin = (object, axis, speed) => {
+  object.rotation[axis] += speed;
+};
 
 // =========================
 // Animation Loop
@@ -94,6 +123,9 @@ function animate() {
     const intensity = Math.abs(Math.sin(time + index * 0.1)) * 1.2 + 0.3;
     star.material.color.setScalar(intensity);
   });
+
+  // Update Planet Rotation
+  planet.rotation.y += 0.001;
 
   renderer.render(scene, camera);
 }
